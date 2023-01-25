@@ -48,11 +48,12 @@ int main()
 			if (focus == false)
 			{
 				window.setTitle("paused");
-				paused == true;
+				paused = true;
 			}
 			else
 			{
 				window.setTitle("Sample window");
+				paused = false;
 			}
 
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
@@ -74,56 +75,46 @@ int main()
 			}
 		}
 
-		void drawWorld();
-		drawWorld();
-		void updateWorld();
-		while (!paused) {
-			updateWorld();
+		window.clear(sf::Color::Black);
+
+		window.draw(text);
+		window.draw(score);
+		window.draw(player);
+		window.draw(wall);
+		window.draw(ball);
+
+		window.display();
+
+		if (paused == false)
+		{
+			if (ballHitPlayer == false)
+			{
+				ball.move(ballSpeed, 0.f);
+			}
+
+			sf::FloatRect ballBounds = ball.getGlobalBounds();
+			sf::FloatRect playerBounds = player.getGlobalBounds();
+			sf::FloatRect wallBounds = wall.getGlobalBounds();
+			if (ballBounds.intersects(playerBounds))
+			{
+				ballHitPlayer = true;
+			}
+			if (ballHitPlayer)
+			{
+				ball.move(-ballSpeed, 0.f);
+			}
+
+			if (ballBounds.intersects(wallBounds))
+			{
+				ballHitPlayer = false;
+				playerScore++;
+				std::cout << playerScore;
+			}
+
+			auto s = std::to_string(playerScore);
+			score.setString("Current score: " + s);
 		}
 	}
 
 	return 0;
-}
-
-void drawWorld()
-{
-	main.window.clear(sf::Color::Black);
-
-	window.draw(text);
-	window.draw(score);
-	window.draw(player);
-	window.draw(wall);
-	window.draw(ball);
-
-	window.display();
-}
-
-void updateWorld()
-{
-	if (ballHitPlayer == false)
-	{
-		ball.move(ballSpeed, 0.f);
-	}
-
-	sf::FloatRect ballBounds = ball.getGlobalBounds();
-	sf::FloatRect playerBounds = player.getGlobalBounds();
-	sf::FloatRect wallBounds = wall.getGlobalBounds();
-	if (ballBounds.intersects(playerBounds))
-	{
-		ballHitPlayer = true;
-	}
-	if (ballHitPlayer)
-	{
-		ball.move(-ballSpeed, 0.f);
-	}
-
-	if (ballBounds.intersects(wallBounds))
-	{
-		ballHitPlayer = false;
-		playerScore++;
-		std::cout << playerScore;
-	}
-
-	auto s = std::to_string(playerScore);
-	score.setString("Current score: " + s);
 }
