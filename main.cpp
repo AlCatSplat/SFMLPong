@@ -7,18 +7,21 @@
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFMLPong");
-	window.setVerticalSyncEnabled(false);
+	window.setVerticalSyncEnabled(true);
+
+	sf::Clock clock;
 
 	bool paused = false;
 	bool restartGame = false;
 	bool lost = false;
+	bool canMoveW = false;
+	bool canMoveS = false;
 
 	float ballAngle = 75.f;
 	float ballSpeed = -400.f;
+	float playerSpeed = 500.f;
 
 	int playerScore = 0;
-
-	sf::Clock clock;
 
 	sf::Vector2f velocity;
 
@@ -113,10 +116,16 @@ int main()
 				}
 
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-					player.move(0.f, -10.f);
+					canMoveW = true;
+				}
+				else {
+					canMoveW = false;
 				}
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-					player.move(0.f, 10.f);
+					canMoveS = true;
+				}
+				else {
+					canMoveS = false;
 				}
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 					window.close();
@@ -184,6 +193,16 @@ int main()
 				if (ball.getGlobalBounds().intersects(leftBound.getGlobalBounds())) {
 					lost = true;
 					death.play();
+				}
+
+				if (canMoveW) {
+					float playerMove = deltaTime * playerSpeed;
+					player.move(0.f, -playerMove);
+				}
+
+				if (canMoveS) {
+					float playerMove = deltaTime * playerSpeed;
+					player.move(0.f, playerMove);
 				}
 
 				if (lost) {
