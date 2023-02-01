@@ -16,6 +16,8 @@ int main()
 	bool lost = false;
 	bool canMoveW = false;
 	bool canMoveS = false;
+	bool headingEast = false;
+	bool headingWest = true;
 
 	float ballAngle = 75.f;
 	float ballSpeed = -400.f;
@@ -166,6 +168,8 @@ int main()
 					ballSpeed = -ballSpeed;
 					std::cout << "ping";
 					ping.play();
+					headingEast = true;
+					headingWest = false;
 				}
 
 				if (ball.getGlobalBounds().intersects(wall.getGlobalBounds())) {
@@ -176,6 +180,8 @@ int main()
 					playerScore++;
 					std::cout << "pong";
 					ping.play();
+					headingWest = true;
+					headingEast = false;
 				}
 
 				if (ball.getGlobalBounds().intersects(topBound.getGlobalBounds())) {
@@ -193,6 +199,20 @@ int main()
 				if (ball.getGlobalBounds().intersects(leftBound.getGlobalBounds())) {
 					lost = true;
 					death.play();
+				}
+
+				if (playerScore >= 5 && playerScore <= 20 && headingWest) {
+					ballSpeed = -500.f;
+				}
+				else if (playerScore >= 5 && playerScore <= 20 && headingEast) {
+					ballSpeed = 500.f;
+				}
+
+				if (playerScore >= 20 && playerScore <= 40 && headingWest) {
+					ballSpeed = -700.f;
+				}
+				else if (playerScore >= 20 && playerScore <= 40 && headingEast) {
+					ballSpeed = 700.f;
 				}
 
 				if (canMoveW) {
