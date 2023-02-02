@@ -7,7 +7,7 @@
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFMLPong");
-	window.setVerticalSyncEnabled(true);
+	window.setVerticalSyncEnabled(false);
 
 	sf::Clock clock;
 
@@ -213,6 +213,13 @@ int main()
 				}
 				else if (playerScore >= 20 && playerScore <= 40 && headingEast) {
 					ballSpeed = 700.f;
+				}
+
+				if (playerScore >= 40 && playerScore <= 60 && headingWest) {
+					ballSpeed = -900.f;
+				}
+				else if (playerScore >= 40 && playerScore <= 60 && headingEast) {
+					ballSpeed = 900.f;
 				}
 
 				if (canMoveW) {
