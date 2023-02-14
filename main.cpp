@@ -4,6 +4,15 @@
 #include <string>
 #include <iostream>
 
+class paddle {
+public:
+	paddle(float x, float y) {
+		std::cout << (x, y);
+		sf::RectangleShape player(sf::Vector2f(10.f, 120.f));
+		player.setPosition(x, y);
+	}
+};
+
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFMLPong");
@@ -55,8 +64,9 @@ int main()
 	restart.setCharacterSize(30);
 	restart.setPosition(280.f, 300.f);
 
-	sf::RectangleShape player(sf::Vector2f(10.f, 120.f));
-	player.setPosition(10.f, 50.f);
+	//sf::RectangleShape player(sf::Vector2f(10.f, 120.f));
+	//player.setPosition(10.f, 50.f);
+	paddle(10.f, 50.f);
 
 	sf::RectangleShape wall(sf::Vector2f(10.f, 600.f));
 	wall.setPosition(785.f, 0.f);
@@ -100,154 +110,151 @@ int main()
 	sf::Sound edge;
 	edge.setBuffer(edgeBuffer);
 
-	do {
-		while (window.isOpen())
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
 		{
-			sf::Event event;
-			while (window.pollEvent(event))
-			{
-				bool focus = window.hasFocus();
+			bool focus = window.hasFocus();
 
-				if (focus == false) {
-					window.setTitle("paused");
-					paused = true;
-				}
-				else {
-					window.setTitle("SFMLPong");
-					paused = false;
-				}
-
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-					canMoveW = true;
-				}
-				else {
-					canMoveW = false;
-				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-					canMoveS = true;
-				}
-				else {
-					canMoveS = false;
-				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-					window.close();
-				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::R) && lost) {
-					restartGame = true;
-				}
-
-				if (event.type == sf::Event::Closed) {
-					window.close();
-				}
+			if (focus == false) {
+				window.setTitle("paused");
+				paused = true;
+			}
+			else {
+				window.setTitle("SFMLPong");
+				paused = false;
 			}
 
-			window.clear(sf::Color::Black);
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+				canMoveW = true;
+			}
+			else {
+				canMoveW = false;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+				canMoveS = true;
+			}
+			else {
+				canMoveS = false;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+				window.close();
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::R) && lost) {
+				restartGame = true;
+			}
 
-			window.draw(text);
-			window.draw(score);
-			window.draw(player);
-			window.draw(wall);
-			window.draw(ball);
-			window.draw(topBound);
-			window.draw(bottomBound);
-			window.draw(leftBound);
-
-			if (!paused)
-			{
-				float deltaTime = clock.restart().asSeconds();
-				float factor = deltaTime * ballSpeed;
-				velocity.x = std::cos(ballAngle) * factor;
-				velocity.y = std::sin(ballAngle) * factor;
-
-				ball.move(velocity.x, velocity.y);
-
-				if (ball.getGlobalBounds().intersects(player.getGlobalBounds())) {
-					ball.move(-velocity.x, -velocity.y);
-					velocity.x = -velocity.x;
-					ballAngle = -ballAngle;
-					ballSpeed = -ballSpeed;
-					std::cout << "ping";
-					ping.play();
-					headingEast = true;
-					headingWest = false;
-				}
-
-				if (ball.getGlobalBounds().intersects(wall.getGlobalBounds())) {
-					ball.move(-velocity.x, -velocity.y);
-					velocity.x = -velocity.x;
-					ballAngle = -ballAngle;
-					ballSpeed = -ballSpeed;
-					playerScore++;
-					std::cout << "pong";
-					ping.play();
-					headingWest = true;
-					headingEast = false;
-				}
-
-				if (ball.getGlobalBounds().intersects(topBound.getGlobalBounds())) {
-					velocity.y = -velocity.y;
-					ballAngle = -ballAngle;
-					edge.play();
-				}
-
-				if (ball.getGlobalBounds().intersects(bottomBound.getGlobalBounds())) {
-					velocity.y = -velocity.y;
-					ballAngle = -ballAngle;
-					edge.play();
-				}
-
-				if (ball.getGlobalBounds().intersects(leftBound.getGlobalBounds())) {
-					lost = true;
-					death.play();
-				}
-
-				if (playerScore >= 5 && playerScore <= 20 && headingWest) {
-					ballSpeed = -500.f;
-				}
-				else if (playerScore >= 5 && playerScore <= 20 && headingEast) {
-					ballSpeed = 500.f;
-				}
-
-				if (playerScore >= 20 && playerScore <= 40 && headingWest) {
-					ballSpeed = -700.f;
-				}
-				else if (playerScore >= 20 && playerScore <= 40 && headingEast) {
-					ballSpeed = 700.f;
-				}
-
-				if (playerScore >= 40 && playerScore <= 60 && headingWest) {
-					ballSpeed = -900.f;
-				}
-				else if (playerScore >= 40 && playerScore <= 60 && headingEast) {
-					ballSpeed = 900.f;
-				}
-
-				if (canMoveW) {
-					float playerMove = deltaTime * playerSpeed;
-					player.move(0.f, -playerMove);
-				}
-
-				if (canMoveS) {
-					float playerMove = deltaTime * playerSpeed;
-					player.move(0.f, playerMove);
-				}
-
-				if (lost) {
-					window.draw(youLose);
-					window.draw(restart);
-				}
-
-				if (restartGame) {
-					std::cout << "poop";
-				}
-
-				window.display();
-
-				auto s = std::to_string(playerScore);
-				score.setString("Current score: " + s);
-
+			if (event.type == sf::Event::Closed) {
+				window.close();
 			}
 		}
-	} while (!restartGame);
+
+		window.clear(sf::Color::Black);
+
+		window.draw(text);
+		window.draw(score);
+		window.draw(paddle);
+		window.draw(wall);
+		window.draw(ball);
+		window.draw(topBound);
+		window.draw(bottomBound);
+		window.draw(leftBound);
+
+		if (!paused)
+		{
+			float deltaTime = clock.restart().asSeconds();
+			float factor = deltaTime * ballSpeed;
+			velocity.x = std::cos(ballAngle) * factor;
+			velocity.y = std::sin(ballAngle) * factor;
+
+			ball.move(velocity.x, velocity.y);
+
+			if (ball.getGlobalBounds().intersects(player.getGlobalBounds())) {
+				ball.move(-velocity.x, -velocity.y);
+				velocity.x = -velocity.x;
+				ballAngle = -ballAngle;
+				ballSpeed = -ballSpeed;
+				std::cout << "ping";
+				ping.play();
+				headingEast = true;
+				headingWest = false;
+			}
+
+			if (ball.getGlobalBounds().intersects(wall.getGlobalBounds())) {
+				ball.move(-velocity.x, -velocity.y);
+				velocity.x = -velocity.x;
+				ballAngle = -ballAngle;
+				ballSpeed = -ballSpeed;
+				playerScore++;
+				std::cout << "pong";
+				ping.play();
+				headingWest = true;
+				headingEast = false;
+			}
+
+			if (ball.getGlobalBounds().intersects(topBound.getGlobalBounds())) {
+				velocity.y = -velocity.y;
+				ballAngle = -ballAngle;
+				edge.play();
+			}
+
+			if (ball.getGlobalBounds().intersects(bottomBound.getGlobalBounds())) {
+				velocity.y = -velocity.y;
+				ballAngle = -ballAngle;
+				edge.play();
+			}
+
+			if (ball.getGlobalBounds().intersects(leftBound.getGlobalBounds())) {
+				lost = true;
+				death.play();
+			}
+
+			if (playerScore >= 5 && playerScore <= 20 && headingWest) {
+				ballSpeed = -500.f;
+			}
+			else if (playerScore >= 5 && playerScore <= 20 && headingEast) {
+				ballSpeed = 500.f;
+			}
+
+			if (playerScore >= 20 && playerScore <= 40 && headingWest) {
+				ballSpeed = -700.f;
+			}
+			else if (playerScore >= 20 && playerScore <= 40 && headingEast) {
+				ballSpeed = 700.f;
+			}
+
+			if (playerScore >= 40 && playerScore <= 60 && headingWest) {
+				ballSpeed = -900.f;
+			}
+			else if (playerScore >= 40 && playerScore <= 60 && headingEast) {
+				ballSpeed = 900.f;
+			}
+
+			if (canMoveW) {
+				float playerMove = deltaTime * playerSpeed;
+				player.move(0.f, -playerMove);
+			}
+
+			if (canMoveS) {
+				float playerMove = deltaTime * playerSpeed;
+				player.move(0.f, playerMove);
+			}
+
+			if (lost) {
+				window.draw(youLose);
+				window.draw(restart);
+			}
+
+			if (restartGame) {
+				std::cout << "poop";
+			}
+
+			window.display();
+
+			auto s = std::to_string(playerScore);
+			score.setString("Current score: " + s);
+		}
+	}	
 	return 0;
 }
