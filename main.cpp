@@ -4,18 +4,23 @@
 #include <string>
 #include <iostream>
 
-class paddle {
+sf::RenderWindow window(sf::VideoMode(800, 600), "SFMLPong");
+
+class Paddle {
+private:
+	float xSize = 10.f;
+	float ySize = 120.f;
 public:
-	paddle(float x, float y) {
-		std::cout << (x, y);
-		sf::RectangleShape player(sf::Vector2f(10.f, 120.f));
-		player.setPosition(x, y);
+	sf::RectangleShape player(sf::Vector2f(xSize));
+	Paddle(float z, float k) {
+		//sf::RectangleShape player(sf::Vector2f(xSize, ySize));
+		player.setPosition(z, k);
+		window.draw(player);
 	}
 };
-
+	
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(800, 600), "SFMLPong");
 	window.setVerticalSyncEnabled(false);
 
 	sf::Clock clock;
@@ -64,9 +69,7 @@ int main()
 	restart.setCharacterSize(30);
 	restart.setPosition(280.f, 300.f);
 
-	//sf::RectangleShape player(sf::Vector2f(10.f, 120.f));
-	//player.setPosition(10.f, 50.f);
-	paddle(10.f, 50.f);
+	Paddle paddle(10.f, 50.f);
 
 	sf::RectangleShape wall(sf::Vector2f(10.f, 600.f));
 	wall.setPosition(785.f, 0.f);
@@ -154,7 +157,6 @@ int main()
 
 		window.draw(text);
 		window.draw(score);
-		window.draw(paddle);
 		window.draw(wall);
 		window.draw(ball);
 		window.draw(topBound);
@@ -170,7 +172,7 @@ int main()
 
 			ball.move(velocity.x, velocity.y);
 
-			if (ball.getGlobalBounds().intersects(player.getGlobalBounds())) {
+			if (ball.getGlobalBounds().intersects(Paddle::player.getGlobalBounds())) {
 				ball.move(-velocity.x, -velocity.y);
 				velocity.x = -velocity.x;
 				ballAngle = -ballAngle;
@@ -255,6 +257,6 @@ int main()
 			auto s = std::to_string(playerScore);
 			score.setString("Current score: " + s);
 		}
-	}	
+	}
 	return 0;
 }
