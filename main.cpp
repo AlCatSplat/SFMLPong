@@ -4,23 +4,57 @@
 #include <string>
 #include <iostream>
 
-sf::RenderWindow window(sf::VideoMode(800, 600), "SFMLPong");
-
 class Paddle {
 private:
 	float xSize = 10.f;
 	float ySize = 120.f;
+	float playerSpeed = 500.f;	
+	bool paddleCanMoveUp = true;
+	bool paddleCanMoveDown = true;
+	sf::RectangleShape paddle;
+
 public:
-	sf::RectangleShape player(sf::Vector2f(xSize));
 	Paddle(float z, float k) {
-		//sf::RectangleShape player(sf::Vector2f(xSize, ySize));
-		player.setPosition(z, k);
-		window.draw(player);
+		paddle.setPosition(z, k);
+		paddle.setSize(sf::Vector2f(xSize, ySize));
+	}
+	sf::FloatRect bounds() {
+		return paddle.getGlobalBounds();
+	}
+	sf::Vector2f position() {
+		return paddle.getPosition();
+	}
+	void drawPaddle(sf::RenderWindow& window) {
+		window.draw(paddle);
+	}
+	
+	void startClock(sf::Clock& clock) {
+		float deltaTime = clock.restart().asSeconds();
+		float playerMove = dTime(clock) * playerSpeed;
+	}
+	int dTime(sf::Clock& clock) {
+		//float deltaTime = clock.restart().asSeconds();
+		return deltaTime;
+	}
+	void paddleMoveUp(sf::Clock& clock, bool paddleCanMoveUp) {
+		if (paddleCanMoveUp) {
+			float deltaTime = clock.restart().asSeconds();
+			float playerMove = deltaTime * playerSpeed;
+			paddle.move(0.f, -playerMove);
+		}
+	}
+	void paddleMoveDown(sf::Clock& clock, bool paddleCanMoveDown) {
+		if (paddleCanMoveDown) {
+			float deltaTime = clock.restart().asSeconds();
+			float playerMove = deltaTime * playerSpeed;
+			paddle.move(0.f, playerMove);
+		}
 	}
 };
-	
+
 int main()
 {
+	sf::RenderWindow window(sf::VideoMode(800, 600), "SFMLPong");
 	window.setVerticalSyncEnabled(false);
 
 	sf::Clock clock;
@@ -130,16 +164,21 @@ int main()
 			}
 
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-				canMoveW = true;
+				//canMoveW = true;
+				
+
+				paddle.paddleMoveUp(clock, true);
+				std::cout << "test";
 			}
 			else {
-				canMoveW = false;
+				paddle.paddleMoveUp(clock, false);
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-				canMoveS = true;
+				//canMoveS = true;
+				paddle.paddleMoveDown(clock, true);
 			}
 			else {
-				canMoveS = false;
+				paddle.paddleMoveDown(clock, false);
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 				window.close();
@@ -155,6 +194,8 @@ int main()
 
 		window.clear(sf::Color::Black);
 
+		paddle.drawPaddle(window);
+
 		window.draw(text);
 		window.draw(score);
 		window.draw(wall);
@@ -165,6 +206,8 @@ int main()
 
 		if (!paused)
 		{
+			paddle.startClock(clock);
+
 			float deltaTime = clock.restart().asSeconds();
 			float factor = deltaTime * ballSpeed;
 			velocity.x = std::cos(ballAngle) * factor;
@@ -172,7 +215,7 @@ int main()
 
 			ball.move(velocity.x, velocity.y);
 
-			if (ball.getGlobalBounds().intersects(Paddle::player.getGlobalBounds())) {
+			if (ball.getGlobalBounds().intersects(paddle.bounds())) {
 				ball.move(-velocity.x, -velocity.y);
 				velocity.x = -velocity.x;
 				ballAngle = -ballAngle;
@@ -234,13 +277,13 @@ int main()
 			}
 
 			if (canMoveW) {
-				float playerMove = deltaTime * playerSpeed;
-				player.move(0.f, -playerMove);
+				//float playerMove = deltaTime * playerSpeed;
+				//paddle.move(0.f, -playerMove);
 			}
 
 			if (canMoveS) {
-				float playerMove = deltaTime * playerSpeed;
-				player.move(0.f, playerMove);
+				//float playerMove = deltaTime * playerSpeed;
+				//paddle.move(0.f, playerMove);
 			}
 
 			if (lost) {
