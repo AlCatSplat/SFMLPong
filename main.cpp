@@ -3,22 +3,14 @@
 #include <SFML/Audio.hpp>
 #include <string>
 #include <iostream>
-//float deltaTime;
-void startDeltaTime(sf::Clock& clock)
-{
-	float deltaTime = clock.restart().asSeconds();
-}
-
-float returnDelta()
-{
-	return deltaTime;
-}
 
 class Paddle {
 private:
 	float xSize = 10.f;
 	float ySize = 120.f;
-	float playerSpeed = 500.f;	
+	float playerSpeed = 500.f;
+	float playerMove = 0.f;
+	int playerScore = 0;
 	bool paddleCanMoveUp = true;
 	bool paddleCanMoveDown = true;
 	sf::RectangleShape paddle;
@@ -37,19 +29,27 @@ public:
 	void draw(sf::RenderWindow& window) {
 		window.draw(paddle);
 	}
-	float pMove() {
-		float playerMove = returnDelta() * playerSpeed;
-		return playerMove;
+	void resetPos() {
+		paddle.setPosition(10.f, 50.f);
 	}
-	void paddleMoveUp(sf::Clock& clock, bool paddleCanMoveUp) {
-		if (paddleCanMoveUp) {
-			paddle.move(0.f, -pMove());
-			std::cout << pMove();
+	int getPlayerScore() {
+		return playerScore;
+	}
+	void setPlayerScore(int p) {
+		playerScore = p;
+	}
+	float pSpeed() {
+		return playerSpeed;
+	}
+	void setPlayerMove(float d, float p) {
+		playerMove = d * p;
+	}
+	void handleInput() {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+			paddle.move(0.f, -playerMove);
 		}
-	}
-	void paddleMoveDown(sf::Clock& clock, bool paddleCanMoveDown) {
-		if (paddleCanMoveDown) {
-			paddle.move(0.f, pMove());
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+			paddle.move(0.f, playerMove);
 		}
 	}
 };
@@ -58,8 +58,9 @@ int main()
 {
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFMLPong");
 	window.setVerticalSyncEnabled(false);
+	window.setFramerateLimit(120);
 
-	sf::Clock clock;
+	sf::Clock clocky;
 
 	bool paused = false;
 	bool restartGame = false;
@@ -71,9 +72,6 @@ int main()
 
 	float ballAngle = 75.f;
 	float ballSpeed = -400.f;
-	//float playerSpeed = 500.f;
-
-	int playerScore = 0;
 
 	sf::Vector2f velocity;
 
@@ -154,28 +152,13 @@ int main()
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			bool focus = window.hasFocus();
-
-			if (focus == false) {
+			if (event.type == sf::Event::LostFocus) {
 				window.setTitle("paused");
 				paused = true;
 			}
-			else {
+			if (event.type == sf::Event::GainedFocus) {
 				window.setTitle("SFMLPong");
 				paused = false;
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-				paddle.paddleMoveUp(clock, true);
-				std::cout << "test";
-			}
-			else {
-				paddle.paddleMoveUp(clock, false);
-			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-				paddle.paddleMoveDown(clock, true);
-			}
-			else {
-				paddle.paddleMoveDown(clock, false);
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 				window.close();
@@ -183,7 +166,6 @@ int main()
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::R) && lost) {
 				restartGame = true;
 			}
-
 			if (event.type == sf::Event::Closed) {
 				window.close();
 			}
@@ -203,9 +185,13 @@ int main()
 
 		if (!paused)
 		{
-			startDeltaTime(clock);
-			//float deltaTime = clock.restart().asSeconds();
-			float factor = returnDelta() * ballSpeed;
+			paddle.handleInput();
+
+			float deltaTime = clocky.restart().asSeconds();
+
+			paddle.setPlayerMove(deltaTime, paddle.pSpeed());
+			
+			float factor = deltaTime * ballSpeed;
 			velocity.x = std::cos(ballAngle) * factor;
 			velocity.y = std::sin(ballAngle) * factor;
 
@@ -227,7 +213,7 @@ int main()
 				velocity.x = -velocity.x;
 				ballAngle = -ballAngle;
 				ballSpeed = -ballSpeed;
-				playerScore++;
+				paddle.setPlayerScore(paddle.getPlayerScore() + 1);
 				std::cout << "pong";
 				ping.play();
 				headingWest = true;
@@ -251,39 +237,43 @@ int main()
 				death.play();
 			}
 
-			if (playerScore >= 5 && playerScore <= 20 && headingWest) {
+			if (paddle.getPlayerScore() >= 5 && paddle.getPlayerScore() <= 20 && headingWest) {
 				ballSpeed = -500.f;
 			}
-			else if (playerScore >= 5 && playerScore <= 20 && headingEast) {
+			else if (paddle.getPlayerScore() >= 5 && paddle.getPlayerScore() <= 20 && headingEast) {
 				ballSpeed = 500.f;
 			}
 
-			if (playerScore >= 20 && playerScore <= 40 && headingWest) {
+			if (paddle.getPlayerScore() >= 20 && paddle.getPlayerScore() <= 40 && headingWest) {
 				ballSpeed = -700.f;
 			}
-			else if (playerScore >= 20 && playerScore <= 40 && headingEast) {
+			else if (paddle.getPlayerScore() >= 20 && paddle.getPlayerScore() <= 40 && headingEast) {
 				ballSpeed = 700.f;
 			}
 
-			if (playerScore >= 40 && playerScore <= 60 && headingWest) {
+			if (paddle.getPlayerScore() >= 40 && paddle.getPlayerScore() <= 60 && headingWest) {
 				ballSpeed = -900.f;
 			}
-			else if (playerScore >= 40 && playerScore <= 60 && headingEast) {
+			else if (paddle.getPlayerScore() >= 40 && paddle.getPlayerScore() <= 60 && headingEast) {
 				ballSpeed = 900.f;
 			}
 
-			if (lost) {
+			if (lost && !restartGame) {
 				window.draw(youLose);
 				window.draw(restart);
 			}
 
 			if (restartGame) {
-				std::cout << "poop";
+				paddle.setPlayerScore(0);
+				ball.setPosition(700.f, 200.f);
+				paddle.resetPos();
+				restartGame = false;
+				lost = false;
 			}
 
 			window.display();
 
-			auto s = std::to_string(playerScore);
+			auto s = std::to_string(paddle.getPlayerScore());
 			score.setString("Current score: " + s);
 		}
 	}
