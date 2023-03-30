@@ -8,6 +8,7 @@ class Paddle {
 private:
 	float xSize = 10.f;
 	float ySize = 120.f;
+	sf::Vector2f initialPos;
 	float playerSpeed = 500.f;
 	float playerMove = 0.f;
 	int playerScore = 0;
@@ -17,7 +18,8 @@ private:
 
 public:
 	Paddle(sf::Vector2f position, sf::RenderWindow& window) {
-		paddle.setPosition(position);
+		initialPos = position;
+		paddle.setPosition(initialPos);
 		paddle.setSize(sf::Vector2f(xSize, ySize));
 	}
 	sf::FloatRect bounds() {
@@ -30,7 +32,7 @@ public:
 		window.draw(paddle);
 	}
 	void resetPos() {
-		paddle.setPosition(10.f, 50.f);
+		paddle.setPosition(initialPos);
 	}
 	int getPlayerScore() {
 		return playerScore;
@@ -266,6 +268,7 @@ int main()
 			if (restartGame) {
 				paddle.setPlayerScore(0);
 				ball.setPosition(700.f, 200.f);
+				ballSpeed = -400.f;
 				paddle.resetPos();
 				restartGame = false;
 				lost = false;
